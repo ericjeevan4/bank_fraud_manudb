@@ -146,8 +146,30 @@ def predict():
 
         # Predict
         result = predict_account_fraud(input_data)
-
-        # Return API response
+        
+        
+        # =========================================================
+        # STORE MANUALLY ENTERED ACCOUNT IN MONGODB
+        # =========================================================
+        
+        account_record = {
+            **{
+                feature: input_data[feature]
+                for feature in trained_features
+            },
+            "prediction": result["prediction"],
+            "result": result["result"],
+            "fraud_probability": result["fraud_probability"],
+            "fraud_percentage": result["fraud_percentage"]
+        }
+        
+        manual_accounts_collection.insert_one(account_record)
+        
+        
+        # =========================================================
+        # RETURN API RESPONSE
+        # =========================================================
+        
         return jsonify({
             "status": "success",
             "data": result
