@@ -61,20 +61,6 @@ categorical_features = [
     "CustomerOccupation"
 ]
 
-required_input_fields = [
-    "AccountID",
-    "TransactionAmount",
-    "TransactionType",
-    "Location",
-    "Channel",
-    "CustomerAge",
-    "CustomerOccupation",
-    "AccountBalance",
-    "AnnualIncome",
-    "CurrentAddressMonthCount",
-    "PreviousAddressMonthCount"
-]
-
 
 # =========================================================
 # FRAUD PREDICTION FUNCTION
@@ -107,7 +93,6 @@ def predict_account_fraud(input_data):
         result = "THIS IS A NON FRAUD ACCOUNT"
 
     return {
-        "account_id": input_data["AccountID"],
         "prediction": int(prediction),
         "result": result,
         "fraud_probability": float(fraud_probability),
@@ -147,9 +132,9 @@ def predict():
 
         # Check required fields
         missing_features = [
-            field
-            for field in required_input_fields
-            if field not in input_data
+            feature
+            for feature in trained_features
+            if feature not in input_data
         ]
 
         if missing_features:
@@ -172,7 +157,6 @@ def predict():
         # =========================================================
         
         existing_account = manual_accounts_collection.find_one({
-            "AccountID": input_data["AccountID"],
             "TransactionAmount": input_data["TransactionAmount"],
             "TransactionType": input_data["TransactionType"],
             "Location": input_data["Location"],
@@ -193,7 +177,6 @@ def predict():
         if existing_account is None:
         
             account_record = {
-                "AccountID": input_data["AccountID"],
                 **{
                     feature: input_data[feature]
                     for feature in trained_features
