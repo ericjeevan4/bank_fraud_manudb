@@ -3,9 +3,25 @@ from flask_cors import CORS
 import pandas as pd
 import joblib
 import os
+from pymongo import MongoClient
 
 app = Flask(__name__)
 CORS(app)
+
+# =========================================================
+# MONGODB CONNECTION
+# =========================================================
+
+MONGO_URI = os.environ.get("MONGO_URI")
+
+if not MONGO_URI:
+    raise ValueError("MONGO_URI environment variable is not set")
+
+mongo_client = MongoClient(MONGO_URI)
+
+mongo_db = mongo_client["bank_fraud_db"]
+
+manual_accounts_collection = mongo_db["manual_accounts"]
 
 # =========================================================
 # LOAD SAVED FRAUD DETECTION MODEL
