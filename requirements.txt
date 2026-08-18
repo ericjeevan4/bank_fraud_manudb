@@ -6,3 +6,4 @@ scikit-learn
 lightgbm
 gunicorn
 flask-cors
+pymongo
