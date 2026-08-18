@@ -214,7 +214,44 @@ def predict():
             "message": str(e)
         }), 500
 
+# =========================================================
+# HISTORY API
+# =========================================================
 
+@app.route("/api/history", methods=["GET"])
+def history():
+
+    try:
+
+        # Get all manually entered accounts
+        accounts = manual_accounts_collection.find().sort(
+            "_id",
+            -1
+        )
+
+        history_data = []
+
+        for account in accounts:
+
+            # Convert MongoDB ObjectId to string
+            account["_id"] = str(account["_id"])
+
+            history_data.append(account)
+
+        return jsonify({
+            "status": "success",
+            "count": len(history_data),
+            "data": history_data
+        })
+
+    except Exception as e:
+
+        return jsonify({
+            "status": "error",
+            "error": type(e).__name__,
+            "message": str(e)
+        }), 500
+        
 # =========================================================
 # RUN APPLICATION
 # =========================================================
