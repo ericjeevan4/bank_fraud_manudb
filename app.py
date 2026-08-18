@@ -54,6 +54,12 @@ trained_features = [
     "PreviousAddressMonthCount"
 ]
 
+required_input_fields = [
+    "TransactionID",
+    "AccountID",
+    *trained_features
+]
+
 categorical_features = [
     "TransactionType",
     "Location",
@@ -93,6 +99,8 @@ def predict_account_fraud(input_data):
         result = "THIS IS A NON FRAUD ACCOUNT"
 
     return {
+        "TransactionID": input_data["TransactionID"],
+        "AccountID": input_data["AccountID"],
         "prediction": int(prediction),
         "result": result,
         "fraud_probability": float(fraud_probability),
@@ -131,10 +139,11 @@ def predict():
             }), 400
 
         # Check required fields
+        # Check required fields
         missing_features = [
-            feature
-            for feature in trained_features
-            if feature not in input_data
+            field
+            for field in required_input_fields
+            if field not in input_data
         ]
 
         if missing_features:
@@ -157,16 +166,8 @@ def predict():
         # =========================================================
         
         existing_account = manual_accounts_collection.find_one({
-            "TransactionAmount": input_data["TransactionAmount"],
-            "TransactionType": input_data["TransactionType"],
-            "Location": input_data["Location"],
-            "Channel": input_data["Channel"],
-            "CustomerAge": input_data["CustomerAge"],
-            "CustomerOccupation": input_data["CustomerOccupation"],
-            "AccountBalance": input_data["AccountBalance"],
-            "AnnualIncome": input_data["AnnualIncome"],
-            "CurrentAddressMonthCount": input_data["CurrentAddressMonthCount"],
-            "PreviousAddressMonthCount": input_data["PreviousAddressMonthCount"]
+            "TransactionID": input_data["TransactionID"],
+            "AccountID": input_data["AccountID"]
         })
         
         
@@ -177,10 +178,14 @@ def predict():
         if existing_account is None:
         
             account_record = {
+                "TransactionID": input_data["TransactionID"],
+                "AccountID": input_data["AccountID"],
+            
                 **{
                     feature: input_data[feature]
                     for feature in trained_features
                 },
+            
                 "prediction": result["prediction"],
                 "result": result["result"],
                 "fraud_probability": result["fraud_probability"],
