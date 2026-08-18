@@ -152,18 +152,48 @@ def predict():
         # STORE MANUALLY ENTERED ACCOUNT IN MONGODB
         # =========================================================
         
-        account_record = {
-            **{
-                feature: input_data[feature]
-                for feature in trained_features
-            },
-            "prediction": result["prediction"],
-            "result": result["result"],
-            "fraud_probability": result["fraud_probability"],
-            "fraud_percentage": result["fraud_percentage"]
-        }
+        # =========================================================
+        # CHECK IF ACCOUNT ALREADY EXISTS
+        # =========================================================
         
-        manual_accounts_collection.insert_one(account_record)
+        existing_account = manual_accounts_collection.find_one({
+            "TransactionAmount": input_data["TransactionAmount"],
+            "TransactionType": input_data["TransactionType"],
+            "Location": input_data["Location"],
+            "Channel": input_data["Channel"],
+            "CustomerAge": input_data["CustomerAge"],
+            "CustomerOccupation": input_data["CustomerOccupation"],
+            "AccountBalance": input_data["AccountBalance"],
+            "AnnualIncome": input_data["AnnualIncome"],
+            "CurrentAddressMonthCount": input_data["CurrentAddressMonthCount"],
+            "PreviousAddressMonthCount": input_data["PreviousAddressMonthCount"]
+        })
+        
+        
+        # =========================================================
+        # STORE ONLY IF ACCOUNT DOES NOT EXIST
+        # =========================================================
+        
+        if existing_account is None:
+        
+            account_record = {
+                **{
+                    feature: input_data[feature]
+                    for feature in trained_features
+                },
+                "prediction": result["prediction"],
+                "result": result["result"],
+                "fraud_probability": result["fraud_probability"],
+                "fraud_percentage": result["fraud_percentage"]
+            }
+        
+            manual_accounts_collection.insert_one(account_record)
+        
+            stored_new_account = True
+        
+        else:
+        
+            stored_new_account = False
         
         
         # =========================================================
@@ -172,7 +202,8 @@ def predict():
         
         return jsonify({
             "status": "success",
-            "data": result
+            "data": result,
+            "already_exists": not stored_new_account
         })
 
     except Exception as e:
